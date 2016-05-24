@@ -27,8 +27,9 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <geometry_msgs/Point.h>
 
-//#define VISUALIZE_BB
+#define VISUALIZE_BB
 
+// testing
 
 static obj_seg::rec_3d_framework::GlobalNNPipeline<Metrics::HistIntersectionUnionDistance, pcl::PointXYZ, pcl::VFHSignature308> global;
 ros::Publisher pub;
@@ -150,7 +151,7 @@ segmentAndClassify_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
         prob_str << "cluster[" << i << "]: " << categories[kk] << " [" << conf[kk] << "]" << std::endl;
         //previous_categories_size++;
       }
-      c44::BoundingBox obj_box(clusters[i]);
+
 #ifdef VISUALIZE_BB
       c44::BoundingBox obj_box(clusters[i], frame_id, prob_str.str(), i, marker_ns_obj, marker_ns_text);
       //std::cout << "Inside loop, Marker " << i << " type: " << obj_box.text_marker.type << std::endl;

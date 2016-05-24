@@ -47,7 +47,9 @@ namespace c44{
     PointType min_point_OBB;
     PointType max_point_OBB;
     PointType position_OBB;
+    PointType position_AABB;
     Matrix3f rotational_matrix_OBB;
+    Matrix3f rotational_matrix_AABB;
     float major_value, middle_value, minor_value;
     Vector3f major_vector, middle_vector, minor_vector;
     Vector3f centroid;
