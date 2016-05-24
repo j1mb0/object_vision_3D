@@ -29,7 +29,7 @@
 
 #define VISUALIZE_BB
 
-// testing
+// testing branch is working on master
 
 static obj_seg::rec_3d_framework::GlobalNNPipeline<Metrics::HistIntersectionUnionDistance, pcl::PointXYZ, pcl::VFHSignature308> global;
 ros::Publisher pub;
