@@ -30,8 +30,8 @@
 namespace c44{
   using namespace pcl;
   using namespace Eigen;
-  typedef PointXYZ PointType;
-  typedef PointCloud<PointXYZ> Cloud3D;
+  typedef PointXYZRGB PointType;
+  typedef PointCloud<PointXYZRGB> Cloud3D;
 
   struct BoundingBox{
   public:

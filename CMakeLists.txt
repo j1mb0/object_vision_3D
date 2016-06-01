@@ -145,7 +145,8 @@ add_definitions(${PCL_DEFINITIONS})
 #add_executable(object_segmentation src/object_segmentation.cpp)
 #target_link_libraries(object_segmentation ${catkin_LIBRARIES})
 
-add_executable(object_classification src/object_classification.cpp src/geometries.cpp src/cus_global_nn_classifier.cpp src/cus_global_nn_classifier.hpp)
+add_executable(object_classification src/object_classification.cpp src/geometries.cpp  src/cus_ourcvfh_estimator.h src/cus_global_nn_recognizer_ourcvfh.cpp src/cus_global_nn_recognizer_ourcvfh.hpp src/cus_global_nn_recognizer_ourcvfh.h)
+#src/cus_global_nn_classifier.cpp src/cus_global_nn_classifier.hpp)
 target_link_libraries(object_classification
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES}
