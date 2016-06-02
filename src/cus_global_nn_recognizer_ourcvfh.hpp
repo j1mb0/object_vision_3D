@@ -634,13 +634,6 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
     boost::shared_ptr < std::vector<ModelT> > models = source_->getModels ();
     std::cout << "Models size:" << models->size () << std::endl;
 
-    for (size_t i = 0; i < models->size (); i++)
-    {
-        ModelT cur_model = (*models).at(i);
-        std::string model_path = model_dir_ + "/" + cur_model.class_ + cur_model.id_ + "_assembled.pcd";
-        std::cout << "Model path: " << model_path << std::endl;
-        pcl::io::savePCDFile(model_path, *cur_model.assembled_);
-    }
 
 
     if (force_retrain)
@@ -675,7 +668,6 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
             // Noisify each point in the dataset
             for (size_t cp = 0; cp < view->points.size (); ++cp)
               view->points[cp].z += static_cast<float> (var_nor ());
-
           }
 
           //pro view, compute signatures
@@ -741,4 +733,30 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
     //load features from disk
     //initialize FLANN structure
     loadFeaturesAndCreateFLANN ();
+
+    std::string marker_ns_model = "model";
+    std::string marker_ns_text = "model_text";
+    for (size_t i = 0; i < models->size () && create_bb_; i++)
+    {
+        pcl::ScopeTime create_bb_process ("Creating bounding boxes for models ----------");
+        ModelT cur_model = (*models).at(i);
+        c44::Cloud3D::Ptr model_cloud(new c44::Cloud3D);
+
+        pcl::copyPointCloud(*cur_model.getAssembled(0.01f), *model_cloud);
+        boost::shared_ptr<c44::BoundingBox> model_box (
+                                                        new c44::BoundingBox (
+                                                                               model_cloud,
+                                                                               frame_id_,
+                                                                               cur_model.id_,
+                                                                               0,
+                                                                               marker_ns_model,
+                                                                               marker_ns_text
+                                                                               )
+                                                      );
+        model_bb_dict_[cur_model.id_] = model_box;
+//        std::string model_path = model_dir_ + "/" + cur_model.class_ + cur_model.id_ + "_assembled.pcd";
+//        std::cout << "Model path: " << model_path << std::endl;
+//        pcl::io::savePCDFile(model_path, *cur_model.assembled_);
+    }
+
   }

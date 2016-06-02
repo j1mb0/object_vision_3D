@@ -15,6 +15,8 @@
 //#include <pcl/apps/3d_rec_framework/feature_wrapper/global/ourcvfh_estimator.h>
 #include "cus_ourcvfh_estimator.h"
 #include <pcl/recognition/hv/hypotheses_verification.h>
+#include "geometries.hpp"
+#include <map>
 
 namespace cus_rec_3d_framework
 {
@@ -74,10 +76,16 @@ template<template<class > class Distance, typename PointInT, typename FeatureT =
     /** \brief Descriptor name */
     std::string descr_name_;
 
+    /** \brief Map object for pre-processing the bounding boxes */
+    std::map <std::string, boost::shared_ptr<c44::BoundingBox> > model_bb_dict_;
+
     int ICP_iterations_;
 
     bool noisify_;
     float noise_;
+
+    std::string frame_id_;
+    bool create_bb_;
 
     class flann_model
     {
@@ -216,6 +224,8 @@ template<template<class > class Distance, typename PointInT, typename FeatureT =
       noisify_ = false;
       compute_scale_ = false;
       use_single_categories_ = false;
+      create_bb_ = false;
+      frame_id_ = "not set";
     }
 
     ~GlobalNNCVFHRecognizer ()
@@ -375,6 +385,36 @@ template<template<class > class Distance, typename PointInT, typename FeatureT =
 
         return success;
     }
+
+    void
+    setFrameID(std::string frame_id)
+    {
+        frame_id_ = frame_id;
+    }
+
+    std::string getFrameID()
+    {
+        return frame_id_;
+    }
+
+    void
+    setCreateModelBoxes(bool create_or_not)
+    {
+        create_bb_ = create_or_not;
+    }
+
+    bool
+    getCreateModelBoxes()
+    {
+        return create_bb_;
+    }
+
+    boost::shared_ptr<c44::BoundingBox>
+    getBoundingBoxOfModel(std::string id)
+    {
+        return model_bb_dict_[id];
+    }
+
 
   };
 }

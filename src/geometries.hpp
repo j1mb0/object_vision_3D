@@ -30,13 +30,16 @@
 namespace c44{
   using namespace pcl;
   using namespace Eigen;
-  typedef PointXYZRGB PointType;
-  typedef PointCloud<PointXYZRGB> Cloud3D;
+  typedef PointXYZ PointType;
+  typedef PointCloud<PointXYZ> Cloud3D;
 
   struct BoundingBox{
   public:
+
+
     BoundingBox(Cloud3D::Ptr cloud);
     BoundingBox(Cloud3D::Ptr cloud, std::string frame, std::string text, int id, std::string ns1, std::string ns2);
+    void transform_Markers(Eigen::Matrix4f trans_matrix, PointType centroid);
     // remove();
 
     //following documentation/tutorials/moment_of_inertia.php#moment-of-inertia
@@ -58,6 +61,17 @@ namespace c44{
     tf::Quaternion quat;
     visualization_msgs::Marker obj_marker;
     visualization_msgs::Marker text_marker;
+
+    BoundingBox()
+    {
+        obj_marker.ns = "empty";
+    }
+
+    bool operator<( const BoundingBox& other) const
+    {
+      int less_than = obj_marker.ns.compare(other.obj_marker.ns);
+      return less_than < 0;
+    }
     
     //returns the 1 - determinant of transformation
     // between `this` and the rhs

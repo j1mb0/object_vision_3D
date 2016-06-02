@@ -69,11 +69,11 @@ ScopeTime bounding_box_time ("Created bounding box ------------- ");
   tf::quaternionEigenToTF(eig_quat.cast<double>(), quat);
 
   obj_marker.pose.position.x = position_OBB.x; //centroid[0];
-  text_marker.pose.position.x = position_OBB.x;//centroid[0];
+  text_marker.pose.position.x = position_OBB.x + 0.3;//centroid[0];
   obj_marker.pose.position.y = position_OBB.y;//centroid[1];
-  text_marker.pose.position.y = position_OBB.y;//centroid[1];
+  text_marker.pose.position.y = position_OBB.y - 0.3;//centroid[1];
   obj_marker.pose.position.z = position_OBB.z;//centroid[2];
-  text_marker.pose.position.z = position_OBB.z;//centroid[2];
+  text_marker.pose.position.z = position_OBB.z + 0.3;//centroid[2];
   //obj_marker.pose.orientation = quat;
   obj_marker.pose.orientation.x = quat.getX();
   obj_marker.pose.orientation.y = quat.getY();
@@ -108,6 +108,36 @@ ScopeTime bounding_box_time ("Created bounding box ------------- ");
 
   obj_marker.lifetime = ros::Duration();
   text_marker.lifetime = ros::Duration();
+}
+
+void BoundingBox::transform_Markers(Eigen::Matrix4f Tm, PointType centroid)
+{
+    tf::Matrix3x3 tf3d;
+    // Eigen::Transform<Eigen::Matrix3f, Eigen::Affine> t (Tm);
+    tf3d.setValue(static_cast<double>(Tm(0,0)), static_cast<double>(Tm(0,1)), static_cast<double>(Tm(0,2)),
+            static_cast<double>(Tm(1,0)), static_cast<double>(Tm(1,1)), static_cast<double>(Tm(1,2)),
+            static_cast<double>(Tm(2,0)), static_cast<double>(Tm(2,1)), static_cast<double>(Tm(2,2)));
+    tf::Quaternion tfqt;
+    tf3d.getRotation(tfqt);
+
+
+    obj_marker.pose.position.x = centroid.x; //centroid[0];
+    text_marker.pose.position.x = centroid.x;//centroid[0];
+    obj_marker.pose.position.y = centroid.y;//centroid[1];
+    text_marker.pose.position.y = min_point_OBB.y;//centroid[1];
+    obj_marker.pose.position.z = centroid.z;//centroid[2];
+    text_marker.pose.position.z = centroid.z;//centroid[2];
+
+    obj_marker.pose.orientation.x = tfqt.getX();
+    obj_marker.pose.orientation.y = tfqt.getY();
+    obj_marker.pose.orientation.z = tfqt.getZ();
+    obj_marker.pose.orientation.w = tfqt.getW();
+
+    text_marker.pose.orientation.x = 0.0;//quat.getX();
+    text_marker.pose.orientation.y = 0.0;//quat.getY();
+    text_marker.pose.orientation.z = 0.0;//quat.getZ();
+    text_marker.pose.orientation.w = tfqt.getW();
+
 }
 
 //void BoundingBox::remove()

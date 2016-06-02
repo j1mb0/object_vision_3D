@@ -34,7 +34,7 @@
 #include <pcl/recognition/hv/hv_go.h>
 
 
-//#define VISUALIZE_BB
+#define VISUALIZE_BB
 #define VISUALIZE_MODEL
 
 typedef pcl::PointXYZ PointType;
@@ -83,7 +83,7 @@ segmentAndClassify_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     visualization_msgs::MarkerArray marker_array;
     std::string marker_ns_obj = "object";
     std::string marker_ns_text = "object_desc";
-    std::string frame_id = "camera_depth_optical_frame";
+    std::string frame_id = global.getFrameID();
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_scene (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::fromROSMsg(*cloud_msg, *cloud_scene);
@@ -132,7 +132,7 @@ segmentAndClassify_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     for (size_t i = 0; i < clusters.size (); i++)
     {
         std::ostringstream prob_str;
-        prob_str.precision (1);
+        prob_str.precision (4);
 
         std::stringstream clus_proc_time_str;
         clus_proc_time_str << "Catagorized cluster " << i << " --------";
@@ -150,57 +150,64 @@ segmentAndClassify_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
         boost::shared_ptr<std::vector<pcl::rec_3d_framework::Model<PointType> > > models;
         boost::shared_ptr<std::vector<Eigen::Matrix4f, Eigen::aligned_allocator<Eigen::Matrix4f> > > transforms;
 
-//        global.getDescriptorDistances(dists);
-//std::cout << "Total number of distances: " << dists.size() << std::endl;
-//        models = global.getModels();
-//std::cout << "Total number of models: " << models->size() << std::endl;
-//        transforms = global.getTransforms();
-//std::cout << "Total number of transforms: " << transforms->size() << std::endl;
+        global.getDescriptorDistances(dists);
+std::cout << "Total number of distances: " << dists.size() << std::endl;
+        models = global.getModels();
+std::cout << "Total number of models: " << models->size() << std::endl;
+        transforms = global.getTransforms();
+std::cout << "Total number of transforms: " << transforms->size() << std::endl;
 
         CloudType::Ptr transform_cloud(new CloudType);
         if(models->size() > 0)
         {
-            pcl::ScopeTime model_grab_process ("Grabbing model ------------- ");
+            //pcl::ScopeTime model_grab_process ("Grabbing model ------------- ");
             pcl::rec_3d_framework::Model<PointType> best_model = (*models).at(0);
-            std::cout << "Best match: Model ID: " << best_model.id_ << ", in class: " << best_model.class_<< ", at distance " << dists[0] << std::endl;
+            prob_str << "Best match: Model ID: " << best_model.id_ << ", in class: " << best_model.class_<< ", at distance " << dists[0] << std::endl;
             if(dists[0] < distance_thresh)
             {
-
-                pcl::ScopeTime transforming_process ("Transforming model ------------- ");
+                pcl::ScopeTime transforming_process ("Found Match -> Transforming model ------------- ");
                 pcl::transformPointCloud(*best_model.getAssembled(0.01f), *transform_cloud, (*transforms)[0]);
                 *models_out += *transform_cloud;
+#ifdef VISUALIZE_BB
+                if(global.getCreateModelBoxes())
+                {
+                    PointType centroid;
+                    pcl::computeCentroid(*transform_cloud, centroid);
+                    boost::shared_ptr<c44::BoundingBox> obj_box = global.getBoundingBoxOfModel(best_model.id_); //(clusters[i], frame_id, prob_str.str(), i, marker_ns_obj, marker_ns_text);
+                    // std::cout << "Inside loop, Marker " << i << " type: " << obj_box.text_marker.type << std::endl;
+                    obj_box->text_marker.text = prob_str.str();
+                    obj_box->transform_Markers((*transforms)[0], centroid);
+                    marker_array.markers.push_back(obj_box->obj_marker);
+                    marker_array.markers.push_back(obj_box->text_marker);
+                    cur_marker_size += 2;
+                }
+#endif
             }
         }
-
-#ifdef VISUALIZE_BB
-      c44::BoundingBox obj_box(clusters[i], frame_id, prob_str.str(), i, marker_ns_obj, marker_ns_text);
-      //std::cout << "Inside loop, Marker " << i << " type: " << obj_box.text_marker.type << std::endl;
-      marker_array.markers.push_back(obj_box.obj_marker);
-      marker_array.markers.push_back(obj_box.text_marker);
-      cur_marker_size += 2;
-#endif
     }
 
 #ifdef VISUALIZE_MODEL
     if(models_out->size() > 0)
     {
-    sensor_msgs::PointCloud2::Ptr model_msg (new sensor_msgs::PointCloud2);
-    pcl::toROSMsg(*models_out, *model_msg);
-    model_msg->header.frame_id = frame_id;
-    model_msg->header.stamp = ros::Time::now();
-    model_pub.publish(*model_msg);
-    }
-#endif
+        sensor_msgs::PointCloud2::Ptr model_msg (new sensor_msgs::PointCloud2);
+        pcl::toROSMsg(*models_out, *model_msg);
+        model_msg->header.frame_id = frame_id;
+        model_msg->header.stamp = ros::Time::now();
+        model_pub.publish(*model_msg);
 
 #ifdef VISUALIZE_BB
 std::cout << "Previous Marker size: " << prev_marker_size << ", Current Marker size: " << cur_marker_size << std::endl;
 
-    clearOldMarkers(frame_id, prev_marker_size, marker_ns_obj, marker_ns_text);
+        clearOldMarkers(frame_id, prev_marker_size, marker_ns_obj, marker_ns_text);
 std::cout << "Number of markers to publish" << marker_array.markers.size() << endl;
-    pub.publish(marker_array);
+        marker_pub.publish(marker_array);
 
-    prev_marker_size = marker_array.markers.size();
+        prev_marker_size = marker_array.markers.size();
 #endif
+    }
+#endif
+
+
     std::cout << "[Classification done, " << tt.toc() << " ms] \n";
 std::cout << "Objects segmented: " << clusters.size() << std::endl;
 }
@@ -221,7 +228,12 @@ main (int argc, char ** argv)
     std::string model_dir = home_path + "/classification/models";
     std::string desc_name = "our-cvfh";
     std::string training_dir = home_path + "/classification/trained_models";
+    std::string frame_id = "camera_depth_optical_frame";
     int NN = 10;
+
+    ros::init(argc, argv, "quanta_obj_seg");
+    ros::NodeHandle nh;
+    ros::NodeHandle priv_nh;
 
     //pcl::console::parse_argument (argc, argv, "-scene_path", scene_path);
     //pcl::console::parse_argument (argc, argv, "-models_dir", path);
@@ -281,6 +293,8 @@ main (int argc, char ** argv)
 
     //boost::shared_ptr<pcl::rec_3d_framework::GlobalEstimator<PointType, pcl::VFHSignature308> > cast_estimator;
     //cast_estimator = boost::dynamic_pointer_cast<pcl::rec_3d_framework::OURCVFHEstimator<PointType, pcl::VFHSignature308> > (ourcvfh_estimator);
+    global.setFrameID(frame_id);
+    global.setCreateModelBoxes(true);
     global.setDataSource (cast_source);
     global.setTrainingDir (training_dir);
     global.setModelDir(model_dir);
@@ -290,10 +304,6 @@ main (int argc, char ** argv)
 //    global.setHVAlgorithm(cast_hv_alg);
     global.initialize (false);
 
-    ros::init(argc, argv, "quanta_obj_seg");
-
-    ros::NodeHandle nh;
-    ros::NodeHandle priv_nh;
     std::string sub_topic = nh.resolveName("camera/depth/points");
     std::string pub_topic = nh.resolveName("obj_marker");
     uint32_t queue_size = 1;
