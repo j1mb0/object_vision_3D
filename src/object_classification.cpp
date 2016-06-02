@@ -225,9 +225,9 @@ main (int argc, char ** argv)
 
 
     //std::string scene_path = "scene.pcd";
-    std::string model_dir = home_path + "/classification/models";
+    std::string model_dir = home_path + "/catkin_ws/src/object_vision_3D/classification/models";
     std::string desc_name = "our-cvfh";
-    std::string training_dir = home_path + "/classification/trained_models";
+    std::string training_dir = home_path + "/catkin_ws/src/object_vision_3D/classification/trained_models";
     std::string frame_id = "camera_depth_optical_frame";
     int NN = 10;
 
