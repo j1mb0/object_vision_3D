@@ -2,7 +2,7 @@
 <package>
   <name>object_vision</name>
   <version>0.0.0</version>
-  <description>Object Segmentation and Hand Recognition</description>
+  <description>Realtime Object Segmentation and Recognition</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
@@ -45,11 +45,13 @@
   <build_depend>nodelet</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>nodelet</run_depend>
   <run_depend>pcl_ros</run_depend>
@@ -59,6 +61,7 @@
   <run_depend>tf</run_depend>
   <run_depend>visualization_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

@@ -38,7 +38,7 @@
 
 #define VISUALIZE_BB
 #define VISUALIZE_MODEL
-#define SAVE_PCD
+//#define SAVE_PCD
 
 typedef pcl::PointXYZ PointType;
 typedef pcl::PointCloud<pcl::PointXYZ> CloudType;
@@ -73,37 +73,33 @@ static object_vision::recognitionConfig last_config;
 
 void cfg_cb(object_vision::recognitionConfig &config, uint32_t level) {
     ROS_INFO("Reconfigure Request:");
-    //  ROS_INFO("Reconfigure Request: %d %f %s %s %d",
-//            config.int_param, config.double_param,
-//            config.str_param.c_str(),
-//            config.bool_param?"True":"False",
-//            config.size);
-    useCustSegmentation = config.use_custom_dps;
 
-    cus_dps.setLeafSize(config.downsample_size);
-    dps.setDownsamplingSize(config.downsample_size);
+    ROS_INFO("Downsample leaf size: %f", config.downsample_size);
+    //dps.setDownsamplingSize(config.downsample_size);
 
-    cus_dps.setMinAngle(config.min_angle);
-    cus_dps.setMaxAngle(config.max_angle);
+    ROS_INFO("Cluster Distance Tolerance: %f", config.cluster_tolerance);
+    //dps.setDistanceBetweenClusters(config.cluster_tolerance);
 
-    cus_dps.setClusterTolerance(config.cluster_tolerance);
-    dps.setDistanceBetweenClusters(config.cluster_tolerance);
+    ROS_INFO("Minimum Cluster Size: %d", config.min_cluster_size);
+    //dps.setMinClusterSize(config.min_cluster_size);
 
-    cus_dps.setMinClusterSize(config.min_cluster_size);
-    dps.setMinClusterSize(config.min_cluster_size);
+    ROS_INFO("Min Object Height from Plane: %f", config.object_min_height);
+    //dps.setObjectMinHeight(config.object_min_height);
 
-    cus_dps.setMinObjectDistance(config.object_min_height);
-    dps.setObjectMinHeight(config.object_min_height);
+    ROS_INFO("Max Object Height from Plane: %f", config.object_max_height);
+    //dps.setObjectMaxHeight(config.object_max_height);
 
-    cus_dps.setMaxObjectDistance(config.object_max_height);
-    dps.setObjectMaxHeight(config.object_max_height);
+    ROS_INFO("Cuttoff Distance from Camera Origin: %f", config.object_max_height);
 
+    ROS_INFO("ICP Iterations: %d", config.icp_iterations);
     global.setICPIterations(config.icp_iterations);
+
 
     last_config = config;
 
     // will force a retrain if new angle is different
-    //global.setEpsAngle(config.epsilon_angle_thresh / (180 * M_PI)); // 5 degrees);
+    ROS_INFO("EPS Angle: %d", config.icp_iterations);
+    global.setEpsAngle(config.epsilon_angle_thresh / (180 * M_PI)); // 5 degrees);
 }
 
 void clearOldMarkers(std::string frame_id, size_t num_markers, std::string ns1, std::string ns2)
@@ -170,46 +166,34 @@ segmentAndClassify_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
 
     std::vector<CloudType::Ptr> clusters;
     std::vector<pcl::PointIndices> indices;
-    if(useCustSegmentation){
-        std::cout << " ---- using custom object segmentation pipeline ----" << std::endl;
-        cus_dps.setInputCloud(xyz_points);
-        cus_dps.compute(clusters);
-        cus_dps.getClusterIndices(indices);
 
-    }
-    else
-    {
+    pcl::apps::DominantPlaneSegmentation<PointType> l_dps;
+    std::cout << " ---- using pcl app object segmentation pipeline ----" << std::endl;
+    l_dps.setInputCloud (xyz_points);
+    l_dps.setMaxZBounds (Z_DIST_);
+    l_dps.setObjectMinHeight (0.02);
+    l_dps.setMinClusterSize (50);
+    l_dps.setWSize (9);
+    l_dps.setDistanceBetweenClusters (0.25f);
+    l_dps.setObjectMaxHeight(0.5);
+    l_dps.setDownsamplingSize (0.02f);
 
-        pcl::apps::DominantPlaneSegmentation<PointType> l_dps;
-        std::cout << " ---- using pcl app object segmentation pipeline ----" << std::endl;
-        l_dps.setInputCloud (xyz_points);
-        l_dps.setMaxZBounds (Z_DIST_);
-        l_dps.setObjectMinHeight (0.02);
-        l_dps.setMinClusterSize (50);
-        l_dps.setWSize (9);
-        l_dps.setDistanceBetweenClusters (0.25f);
-        l_dps.setObjectMaxHeight(0.5);
-        l_dps.setDownsamplingSize (0.02f);
 
-        std::cout << "object_min_height: " << last_config.object_min_height << std::endl;
-        l_dps.setObjectMinHeight (last_config.object_min_height);
-        std::cout << "min_cluster_size" << last_config.min_cluster_size << std::endl;
-        l_dps.setMinClusterSize (last_config.min_cluster_size);
-        l_dps.setWSize (9);
-        std::cout << "cluster_tolerance" << last_config.cluster_tolerance << std::endl;
-        l_dps.setDistanceBetweenClusters (last_config.cluster_tolerance);
-        std::cout << "object_max_height" << last_config.object_max_height << std::endl;
-        l_dps.setObjectMaxHeight(last_config.object_max_height);
-        std::cout << "downsample_size" << last_config.downsample_size << std::endl;
-        l_dps.setDownsamplingSize (last_config.downsample_size);
-        l_dps.compute_fast (clusters);
-        l_dps.getIndicesClusters (indices);
-        //std::cout << "Indicies recieved: " << indices.empty() << std::endl;
-        //Eigen::Vector4f table_plane_;
-        //dps.getTableCoefficients (table_plane_);
-        //Eigen::Vector3f normal_plane_ = Eigen::Vector3f (table_plane_[0], table_plane_[1], table_plane_[2]);
-
-    }
+    l_dps.setMaxZBounds(last_config.maximum_distance_thresh);
+    //std::cout << "object_min_height: " << last_config.object_min_height << std::endl;
+    l_dps.setObjectMinHeight (last_config.object_min_height);
+    //std::cout << "min_cluster_size" << last_config.min_cluster_size << std::endl;
+    l_dps.setMinClusterSize (last_config.min_cluster_size);
+    l_dps.setWSize (9);
+    //std::cout << "cluster_tolerance" << last_config.cluster_tolerance << std::endl;
+    l_dps.setDistanceBetweenClusters (last_config.cluster_tolerance);
+    //std::cout << "object_max_height" << last_config.object_max_height << std::endl;
+    l_dps.setObjectMaxHeight(last_config.object_max_height);
+    //std::cout << "downsample_size" << last_config.downsample_size << std::endl;
+    l_dps.setDownsamplingSize (last_config.downsample_size);
+    l_dps.compute_fast (clusters);
+    l_dps.getIndicesClusters (indices);
+    //std::cout << "Indicies recieved: " << indices.empty() << std::endl;
 
     std::cout << "[Segmentation done, " << tt_seg.toc() << " ms] \n";
 
@@ -297,10 +281,10 @@ std::cout << "Total number of transforms: " << transforms->size() << std::endl;
         model_pub.publish(*model_msg);
 
 #ifdef VISUALIZE_BB
-std::cout << "Previous Marker size: " << prev_marker_size << ", Current Marker size: " << cur_marker_size << std::endl;
+//std::cout << "Previous Marker size: " << prev_marker_size << ", Current Marker size: " << cur_marker_size << std::endl;
 
         clearOldMarkers(frame_id, prev_marker_size, marker_ns_obj, marker_ns_text);
-std::cout << "Number of markers to publish" << marker_array.markers.size() << endl;
+//std::cout << "Number of markers to publish" << marker_array.markers.size() << endl;
         marker_pub.publish(marker_array);
 
         prev_marker_size = marker_array.markers.size();
@@ -342,8 +326,8 @@ main (int argc, char ** argv)
     cus_dps.setMaxAngle(1.57);
     cus_dps.setRansacIterations(1000);
     cus_dps.setThresholdDistance(0.01);
-    cus_dps.setMinObjectDistance(0.02);
-    cus_dps.setMaxObjectDistance(0.5);
+    cus_dps.setMinObjectHeight(0.02);
+    cus_dps.setMaxObjectHeight(0.5);
     cus_dps.setClusterTolerance(0.05);
     cus_dps.setMinClusterSize(20);
     cus_dps.setMaxClusterSize(1000);

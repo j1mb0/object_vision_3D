@@ -520,7 +520,8 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
         }
 
 #pragma omp parallel for num_threads(omp_get_num_procs())
-        for (int i = 0; i < static_cast<int> (models_->size ()); i++)
+        // ICP is expensive, only do it for the best match
+        for (int i = 0; i < 1; i++) //static_cast<int> (models_->size ()); i++)
         {
 
           ConstPointInTPtr model_cloud;

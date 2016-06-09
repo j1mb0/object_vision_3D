@@ -56,6 +56,18 @@ template<typename PointInT, typename FeatureT>
     }
 
     void
+    setEpsAngleThreshold(float eps_angle)
+    {
+        eps_angle_threshold_ = eps_angle;
+    }
+
+    float
+    getEpsAngleThreshold()
+    {
+        return eps_angle_threshold_;
+    }
+
+    void
     setAdaptativeMLS (bool b)
     {
       adaptative_MLS_ = b;

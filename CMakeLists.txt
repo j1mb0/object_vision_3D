@@ -19,6 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf_conversions
   visualization_msgs
   geometry_msgs
+  dynamic_reconfigure
+  rospy
 )
 
 
@@ -96,11 +98,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
 ##     and list every .cfg file to be processed
 
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+# Generate dynamic reconfigure parameters in the 'cfg' folder
+ generate_dynamic_reconfigure_options(
+   cfg/object_recognition.cfg
+   cfg/object_segmentation.cfg
+ )
 
 ###################################
 ## catkin specific configuration ##
@@ -142,18 +144,42 @@ add_definitions(${PCL_DEFINITIONS})
 #add_executable(object_handler src/object_handler.cpp)
 #target_link_libraries(object_handler ${catkin_LIBRARIES})
 #add_dependencies(object_segmentation object_segmentation_cpp)
-#add_executable(object_segmentation src/object_segmentation.cpp)
+#add_executable(object_segmentation srobject_recognition.cfgc/object_segmentation.cpp)
 #target_link_libraries(object_segmentation ${catkin_LIBRARIES})
 
-add_executable(object_classification src/object_classification.cpp src/geometries.cpp  src/cus_ourcvfh_estimator.h src/cus_global_nn_recognizer_ourcvfh.cpp src/cus_global_nn_recognizer_ourcvfh.hpp src/cus_global_nn_recognizer_ourcvfh.h)
+
+add_executable(object_recognition
+    src/object_recognition.cpp
+    src/geometries.cpp
+    src/cus_ourcvfh_estimator.h
+    src/cus_global_nn_recognizer_ourcvfh.cpp
+    src/cus_global_nn_recognizer_ourcvfh.hpp
+    src/cus_global_nn_recognizer_ourcvfh.h
+    src/fast_segmentation.cpp
+)
 #src/cus_global_nn_classifier.cpp src/cus_global_nn_classifier.hpp)
-target_link_libraries(object_classification
+target_link_libraries(object_recognition
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES}
   libvtkCommon.so
   libvtkFiltering.so
 )
-add_dependencies(object_classification object_classification_cpp)
+add_dependencies(object_recognition object_recognition_cpp ${PROJECT_NAME}_gencfg)
+
+add_executable(object_segmentation
+    src/object_segmentation.cpp
+    src/geometries.cpp
+    src/fast_segmentation.cpp
+)
+
+#src/cus_global_nn_classifier.cpp src/cus_global_nn_classifier.hpp)
+target_link_libraries(object_segmentation
+  ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
+  libvtkCommon.so
+  libvtkFiltering.so
+)
+add_dependencies(object_segmentation object_segmentation_cpp ${PROJECT_NAME}_gencfg)
 
 
 ## Add cmake target dependencies of the library

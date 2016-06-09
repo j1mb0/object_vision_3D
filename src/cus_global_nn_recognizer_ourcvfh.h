@@ -415,6 +415,15 @@ template<template<class > class Distance, typename PointInT, typename FeatureT =
         return model_bb_dict_[id];
     }
 
+    void
+    setEpsAngle(float eps_angle){
+        if(eps_angle != micvfh_estimator_->getEpsAngleThreshold())
+        {
+            micvfh_estimator_->setEpsAngleThreshold(eps_angle);
+            initialize(true);
+        }
+    }
+
 
   };
 }
