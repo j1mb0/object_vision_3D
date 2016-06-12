@@ -637,6 +637,7 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
 
 
 
+    std::cout << "Force retrain: " << force_retrain << std::endl;
     if (force_retrain)
     {
       for (size_t i = 0; i < models->size (); i++)
@@ -649,6 +650,7 @@ template<template<class > class Distance, typename PointInT, typename FeatureT>
     {
       if (!source_->modelAlreadyTrained (models->at (i), training_dir_, descr_name_))
       {
+        std::cout << "Model not trained, training dir: " << training_dir_ << " descr_name_: " << descr_name_ << std::endl;
         for (size_t v = 0; v < models->at (i).views_->size (); v++)
         {
           PointInTPtr processed (new pcl::PointCloud<PointInT>);

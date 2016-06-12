@@ -196,7 +196,6 @@ pcl::ScopeTime cluster_process_time ("Deleting old markers ------------------ ")
       delete_text_marker.action = visualization_msgs::Marker::DELETE;
       delete_text_marker.ns = ns2;
       del_marker_array.markers.push_back(delete_text_marker);
-
     }
   obj_seg_marker_pub.publish(del_marker_array);
 }

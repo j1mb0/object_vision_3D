@@ -33,7 +33,6 @@
 #include <geometry_msgs/Point.h>
 #include <pcl/recognition/hv/hypotheses_verification.h>
 #include <pcl/recognition/hv/hv_go.h>
-#include "fast_segmentation.hpp"
 #include <object_vision/recognitionConfig.h>
 
 #define VISUALIZE_BB
@@ -49,23 +48,8 @@ static cus_rec_3d_framework::GlobalNNCVFHRecognizer<Metrics::HistIntersectionUni
 ros::Publisher marker_pub;
 ros::Publisher model_pub;
 static size_t prev_marker_size;
-static cus_obj_seg::FastObjectSegmentation cus_dps;
-static pcl::apps::DominantPlaneSegmentation<PointType> dps;
-static bool useCustSegmentation;
 
 static object_vision::recognitionConfig last_config;
-
-//static struct settings
-//{
-//    bool cus_seg;
-//    float leaf_size;
-//    float cluster_tolerance;
-//    float min_angle;
-//    float max_angle;
-//    float cluster_tolerance;
-//    float min_cluster_size;
-//    float object_min_height;
-//    float
 
 
 //};
@@ -75,31 +59,28 @@ void cfg_cb(object_vision::recognitionConfig &config, uint32_t level) {
     ROS_INFO("Reconfigure Request:");
 
     ROS_INFO("Downsample leaf size: %f", config.downsample_size);
-    //dps.setDownsamplingSize(config.downsample_size);
 
     ROS_INFO("Cluster Distance Tolerance: %f", config.cluster_tolerance);
-    //dps.setDistanceBetweenClusters(config.cluster_tolerance);
 
     ROS_INFO("Minimum Cluster Size: %d", config.min_cluster_size);
-    //dps.setMinClusterSize(config.min_cluster_size);
 
     ROS_INFO("Min Object Height from Plane: %f", config.object_min_height);
-    //dps.setObjectMinHeight(config.object_min_height);
 
     ROS_INFO("Max Object Height from Plane: %f", config.object_max_height);
-    //dps.setObjectMaxHeight(config.object_max_height);
 
     ROS_INFO("Cuttoff Distance from Camera Origin: %f", config.object_max_height);
 
     ROS_INFO("ICP Iterations: %d", config.icp_iterations);
     global.setICPIterations(config.icp_iterations);
 
+    // will force a retrain if new angle is different
+    ROS_INFO("EPS Angle: %d", config.epsilon_angle_thresh);
+
+    double angle_in_radians = (double) config.epsilon_angle_thresh / (180 * M_PI);
+    ROS_INFO("angle in radians = %f", angle_in_radians);
+    global.setEpsAngle((float) angle_in_radians);
 
     last_config = config;
-
-    // will force a retrain if new angle is different
-    ROS_INFO("EPS Angle: %d", config.icp_iterations);
-    global.setEpsAngle(config.epsilon_angle_thresh / (180 * M_PI)); // 5 degrees);
 }
 
 void clearOldMarkers(std::string frame_id, size_t num_markers, std::string ns1, std::string ns2)
@@ -316,35 +297,9 @@ main (int argc, char ** argv)
     int NN = 10;
 
 
-
-    // set defaults for object segmentation
-    useCustSegmentation = false;
-    cus_dps.setLeafSize(0.02);
-    cus_dps.setNeighbors_to_analyze(20);
-    cus_dps.setStdDeviation(1.0);
-    cus_dps.setMinAngle(0);
-    cus_dps.setMaxAngle(1.57);
-    cus_dps.setRansacIterations(1000);
-    cus_dps.setThresholdDistance(0.01);
-    cus_dps.setMinObjectHeight(0.02);
-    cus_dps.setMaxObjectHeight(0.5);
-    cus_dps.setClusterTolerance(0.05);
-    cus_dps.setMinClusterSize(20);
-    cus_dps.setMaxClusterSize(1000);
-
     ros::init(argc, argv, "quanta_obj_seg");
     ros::NodeHandle nh;
     ros::NodeHandle priv_nh;
-
-
-    //pcl::console::parse_argument (argc, argv, "-scene_path", scene_path);
-    //pcl::console::parse_argument (argc, argv, "-models_dir", path);
-    //pcl::console::parse_argument (argc, argv, "-training_dir", training_dir);
-    //pcl::console::parse_argument (argc, argv, "-descriptor_name", desc_name);
-    //pcl::console::parse_argument (argc, argv, "-nn", NN);
-
-    //pcl::console::parse_argument (argc, argv, "-z_dist", chop_at_z_);
-    //pcl::console::parse_argument (argc, argv, "-tesselation_level", views_level_);
 
     boost::shared_ptr<pcl::rec_3d_framework::MeshSource<PointType> > mesh_source (new pcl::rec_3d_framework::MeshSource<PointType>);
     mesh_source->setPath (model_dir);
@@ -371,7 +326,7 @@ main (int argc, char ** argv)
     boost::shared_ptr<cus_rec_3d_framework::OURCVFHEstimator<PointType, pcl::VFHSignature308> > ourcvfh_estimator;
     ourcvfh_estimator.reset (new cus_rec_3d_framework::OURCVFHEstimator<PointType, pcl::VFHSignature308>);
     ourcvfh_estimator->setNormalEstimator (normal_estimator);
-    float eps_angle_thresh = 20 / (180 * M_PI); // 5 degrees
+    float eps_angle_thresh = 30 / (180 * M_PI); // 5 degrees
     ourcvfh_estimator->setCVFHParams(eps_angle_thresh, 1.0f, 6.f);
     ourcvfh_estimator->setMinPoints(10);
     //ourcvfh_estimator->setRefineClustersParam();
