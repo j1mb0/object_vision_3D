@@ -1,0 +1,7 @@
+<launch>
+
+	<include file="$(find realsense_camera)/launch/realsense_r200_nodelet_standalone_preset.launch"/>
+	
+	<node pkg="object_vision" name="realsense_recog" type="object_recognition"/>
+
+</launch>

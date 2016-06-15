@@ -100,8 +100,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 # Generate dynamic reconfigure parameters in the 'cfg' folder
  generate_dynamic_reconfigure_options(
-   cfg/object_recognition.cfg
-   cfg/object_segmentation.cfg
+   cfg/recognition.cfg
+   cfg/segmentation.cfg
  )
 
 ###################################
