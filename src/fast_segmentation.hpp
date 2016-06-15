@@ -1,3 +1,15 @@
+/*
+ * Fast but low resolution object segmentation class.
+ * For Portland State University 2016 Capstone Group #44
+ *
+ * Sean Hendrickson
+ *
+ *
+ * Class Header
+ *
+ *
+ */
+
 #ifndef FAST_OBJECT_SEGMENTATION
 #define FAST_OBJECT_SEGMENTATION
 

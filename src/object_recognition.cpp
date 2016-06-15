@@ -1,23 +1,23 @@
 /*
+ * OUR-CVFH Global Recognition Pipeline
+ * For Portland State University 2016 Capstone Group #44
+ *
+ * TODO: Add more comments
+ *       Hunt down re-training bug (suspect file open error, maybe customize source.h)
+ *       Try to implement fast hypothesis verification (commented out currently).
+ *
+ *
+ * SOURCES:
  * test_training.cpp
  *
  *  Created on: Mar 9, 2012
  *      Author: aitor
  */
 #include <pcl/pcl_macros.h>
-//#include <pcl/apps/3d_rec_framework/pipeline/global_nn_classifier.h>
-//#include "cus_global_nn_classifier.h"
-//#include <pcl/apps/3d_rec_framework/pipeline/global_nn_recognizer_cvfh.h>
 #include "cus_global_nn_recognizer_ourcvfh.h"
 #include <pcl/apps/3d_rec_framework/pc_source/mesh_source.h>
-//#include <pcl/apps/3d_rec_framework/feature_wrapper/global/vfh_estimator.h>
-//#include <pcl/apps/3d_rec_framework/feature_wrapper/global/esf_estimator.h>
-//#include <pcl/apps/3d_rec_framework/feature_wrapper/global/cvfh_estimator.h>
-//#include <pcl/apps/3d_rec_framework/feature_wrapper/global/ourcvfh_estimator.h>
 #include "cus_ourcvfh_estimator.h"
-//#include <pcl/apps/3d_rec_framework/tools/openni_frame_source.h>
 #include <pcl/apps/3d_rec_framework/utils/metrics.h>
-//#include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/apps/dominant_plane_segmentation.h>
 #include <pcl/console/parse.h>
 #include <pcl/console/time.h>
@@ -74,11 +74,11 @@ void cfg_cb(object_vision::recognitionConfig &config, uint32_t level) {
     global.setICPIterations(config.icp_iterations);
 
     // will force a retrain if new angle is different
-    ROS_INFO("EPS Angle: %d", config.epsilon_angle_thresh);
+    //ROS_INFO("EPS Angle: %d", config.epsilon_angle_thresh);
 
-    double angle_in_radians = (double) config.epsilon_angle_thresh / (180 * M_PI);
-    ROS_INFO("angle in radians = %f", angle_in_radians);
-    global.setEpsAngle((float) angle_in_radians);
+    //double angle_in_radians = (double) config.epsilon_angle_thresh / (180 * M_PI);
+    //ROS_INFO("angle in radians = %f", angle_in_radians);
+    //global.setEpsAngle((float) angle_in_radians);
 
     last_config = config;
 }
@@ -326,7 +326,7 @@ main (int argc, char ** argv)
     boost::shared_ptr<cus_rec_3d_framework::OURCVFHEstimator<PointType, pcl::VFHSignature308> > ourcvfh_estimator;
     ourcvfh_estimator.reset (new cus_rec_3d_framework::OURCVFHEstimator<PointType, pcl::VFHSignature308>);
     ourcvfh_estimator->setNormalEstimator (normal_estimator);
-    float eps_angle_thresh = 30 / (180 * M_PI); // 5 degrees
+    float eps_angle_thresh = 30 / (180 * M_PI); // 30 degrees
     ourcvfh_estimator->setCVFHParams(eps_angle_thresh, 1.0f, 6.f);
     ourcvfh_estimator->setMinPoints(10);
     //ourcvfh_estimator->setRefineClustersParam();

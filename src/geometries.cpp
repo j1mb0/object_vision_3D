@@ -2,6 +2,10 @@
 //  Geometries.cpp
 //  PCLTestbench
 //
+//  Creates bounding boxes + ROS markers for a point cloud
+//
+//  Matthew Whiteside
+//
 //  Created on 2/10/16.
 //
 

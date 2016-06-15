@@ -1,4 +1,12 @@
 /*
+ * OUR-CVFH Recognizer Class
+ * For Portland State University 2016 Capstone Group #44
+ *
+ * James Schiffer (james.schiffer@gmail.com)
+ *
+ * Class Implementation.
+ *
+ * Sources:
  * global_nn_classifier.cpp
  *
  *  Created on: Mar 9, 2012

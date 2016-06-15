@@ -1,4 +1,12 @@
 /*
+ * OUR-CVFH Recognizer Class Header
+ * For Portland State University 2016 Capstone Group #44
+ *
+ * James Schiffer (james.schiffer@gmail.com)
+ *
+ * Header file.
+ *
+ * Sources:
  * global.h
  *
  *  Created on: Mar 9, 2012

@@ -1,3 +1,14 @@
+/*
+ * Fast but low resolution object segmentation class.
+ * For Portland State University 2016 Capstone Group #44
+ *
+ * Sean Hendrickson
+ *
+ *
+ * Class Implemenation
+ *
+ *
+ */
 #include "fast_segmentation.hpp"
 
 

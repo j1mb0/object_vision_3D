@@ -1,4 +1,13 @@
 /*
+ * OUR-CVFH Estimator Class
+ * For Portland State University 2016 Capstone Group #44
+ *
+ * James Schiffer (james.schiffer@gmail.com)
+ *
+ * Class Header + Implemenation
+ *
+ * Sources:
+ *
  * vfh_estimator.h
  *
  *  Created on: Mar 22, 2012

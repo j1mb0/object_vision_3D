@@ -1,3 +1,13 @@
+/*
+ * Fast Object Segmentation Pipeline
+ * For Portland State University 2016 Capstone Group #44
+ *
+ * James Schiffer
+ *
+ * TODO: Add more comments
+ *       Fix bounding box angle issue.
+ *
+ */
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/common/common.h>
