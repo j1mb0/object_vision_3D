@@ -58,7 +58,7 @@ void clearOldMarkers(std::string frame_id, size_t num_markers, std::string ns1, 
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "quanta_obj_seg");
+    ros::init(argc, argv, "object_seg");
 
     ros::NodeHandle nh;
     std::string sub_topic = nh.resolveName("camera/depth/points");

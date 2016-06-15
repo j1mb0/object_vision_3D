@@ -133,7 +133,6 @@ segmentAndClassify_cb (const sensor_msgs::PointCloud2ConstPtr& cloud_msg)
     float distance_thresh = 0.43f;
 
     pcl::ScopeTime frame_process ("Global frame processing ------------- ");
-    //frame = camera.snap ();
     CloudType::Ptr xyz_points (new CloudType);
     pcl::copyPointCloud (*cloud_scene, *xyz_points);
 
@@ -297,7 +296,7 @@ main (int argc, char ** argv)
     int NN = 10;
 
 
-    ros::init(argc, argv, "quanta_obj_seg");
+    ros::init(argc, argv, "object_recog");
     ros::NodeHandle nh;
     ros::NodeHandle priv_nh;
 
